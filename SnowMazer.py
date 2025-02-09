@@ -126,8 +126,8 @@ while is_window_available(hwnd) and win32gui.IsWindowVisible(hwnd):
         log("检测到 开始作战")
     # 作战中
     text = ocr_image(img, reader, ZUOZHANZHONG_RECT)
-    bbox = find_text_with_confidence(text, '第')
-    if bbox:
+    #bbox = find_text_with_confidence(text, '第')
+    if "击败" in str(text):
         # 点击E键
         pyautogui.press('e')
         # 向前走一点免得锁不到敌人
