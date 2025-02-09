@@ -98,6 +98,7 @@ def get_real_click_position_nobbox(window_rect, ocr_rect_size, img_size):
 reader = easyocr.Reader(['ch_sim'])
 hwnd = get_window_handle('尘白禁区')
 while is_window_available(hwnd) and win32gui.IsWindowVisible(hwnd):
+    time.sleep(0.5)
     if win32api.GetAsyncKeyState(win32con.VK_CONTROL) and win32api.GetAsyncKeyState(win32con.VK_ESCAPE):
         log("检测到 Ctrl+Esc，退出程序")
         break
@@ -117,6 +118,7 @@ while is_window_available(hwnd) and win32gui.IsWindowVisible(hwnd):
         x, y = get_real_click_position(rect, ZENGYISHILIAN_EXIAN_RECT, img.size, bbox)
         click(hwnd, x, y)
         log("检测到 增益试炼：厄险")
+        continue
     # 开始作战
     text = ocr_image(img, reader, KAISHIZUOZHAN_RECT)
     bbox = find_text_with_confidence(text, '开始作战')
@@ -126,7 +128,7 @@ while is_window_available(hwnd) and win32gui.IsWindowVisible(hwnd):
         log("检测到 开始作战")
     # 作战中
     text = ocr_image(img, reader, ZUOZHANZHONG_RECT)
-    #bbox = find_text_with_confidence(text, '第')
+    # bbox = find_text_with_confidence(text, '第')
     if "击败" in str(text):
         # 点击E键
         pyautogui.press('e')
@@ -174,6 +176,3 @@ while is_window_available(hwnd) and win32gui.IsWindowVisible(hwnd):
         x, y = get_real_click_position(rect, TUICHU_RECT, img.size, bbox)
         click(hwnd, x, y)
         log("检测到 退出")
-
-    time.sleep(0.5)
-
