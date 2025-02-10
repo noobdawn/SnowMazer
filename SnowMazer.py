@@ -133,7 +133,15 @@ while is_window_available(hwnd) and win32gui.IsWindowVisible(hwnd):
         # 点击E键
         pyautogui.press('e')
         # 向前走一点免得锁不到敌人
-        pyautogui.press('w')
+        # pyautogui.press('w')
+        
+        # 按下w
+        pyautogui.keyDown('w')
+        # 设定时间延迟
+        time.sleep(0.25)
+        # 释放w
+        pyautogui.keyUp('w')
+        
         log("检测到 作战中，释放常规技")
     # 选择增益
     text = ocr_image(img, reader, XUANZEZENGYI_RECT)
