@@ -132,8 +132,7 @@ while True:
     img = capture_frame(rect)
     # 作战中
     text = ocr_image(img, reader, ZUOZHANZHONG_RECT)
-    # bbox = find_text_with_confidence(text, '第')
-    if "击败" in str(text):
+    if '击败' in str(text) or '目标' in str(text):
         # 点击E键
         pyautogui.press('e')
         if need_move_forward:
@@ -143,6 +142,7 @@ while True:
             pyautogui.keyUp('w')
             need_move_forward = False
         log("检测到 作战中，释放常规技")
+        time.sleep(1)
         continue
     # 选择增益
     text = ocr_image(img, reader, XUANZEZENGYI_RECT)
@@ -157,8 +157,8 @@ while True:
             x, y = get_real_click_position(rect, ZENGYI_LEFT_RECT, img.size, bbox)
             click(hwnd, x, y)
         # 点击确定
-        time.sleep(0.5)
-        text = ocr_image(img, reader, QUEREN_RECT)
+        tempimg = capture_frame(rect)
+        text = ocr_image(tempimg, reader, QUEREN_RECT)
         bbox = find_text_with_confidence(text, '确认')
         if bbox:
             x, y = get_real_click_position(rect, QUEREN_RECT, img.size, bbox)
