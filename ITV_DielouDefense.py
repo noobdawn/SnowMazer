@@ -1,6 +1,6 @@
 # 驱入虚空防御挂机
 
-WAVE_COUNT = 3
+WAVE_COUNT = 4
 
 from Utils.AutoUtils import *
 from Utils.IntoTheVoidUtils import *
@@ -47,7 +47,7 @@ while True:
             time.sleep(1)
             key_up(hwnd, 'a')
             key_down(hwnd, 'd')
-            time.sleep(6.5)
+            time.sleep(6.35)
             key_up(hwnd, 'd')
             key_up(hwnd, 'w')
             current_stage = 2

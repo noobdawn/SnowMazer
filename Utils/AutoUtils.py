@@ -120,6 +120,12 @@ def capture_frame(rect):
         (bmp_info['bmWidth'], bmp_info['bmHeight']),
         bmp_str, 'raw', 'BGRX', 0, 1
     )
+
+    
+    if img.size[1] > 1080:
+        ratio = img.size[0] / img.size[1]
+        img.resize((int(img.size[0] / ratio), 1080))
+
     img.save('temp.png')
 
     memdc.DeleteDC()
