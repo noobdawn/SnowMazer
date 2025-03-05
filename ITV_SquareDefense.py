@@ -1,10 +1,10 @@
 # 驱入虚空防御挂机
 
-WAVE_COUNT = 8
-CAST_INTERVAL = 31.5
+WAVE_COUNT = 8 
 
 from Utils.AutoUtils import *
 from Utils.IntoTheVoidUtils import *
+import random
 
 RENWUWANCHENG_RECT = (0.2, 0, 0.4, 0.2)
 LUNCI_RECT = (0.0, 0.1, 0.4, 0.55)
@@ -15,6 +15,13 @@ current_wave = 0
 while True:
     rect = get_window_rect(hwnd)
     img = capture_frame(rect)
+
+    # 1%的概率跳一下
+    if random.random() < 0.1:
+        key_press(hwnd, 'space')
+        log('跳一下')
+
+    key_press(hwnd, 'Q')
 
     # 识别波数
     text = ocr_image(img, reader, LUNCI_RECT)
