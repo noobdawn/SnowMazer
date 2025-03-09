@@ -1,6 +1,7 @@
 # 驱入虚空防御挂机
 
-WAVE_COUNT = 8 
+WAVE_COUNT = 4
+Q_INTERVAL = 7.5
 
 from Utils.AutoUtils import *
 from Utils.IntoTheVoidUtils import *
@@ -12,6 +13,7 @@ LUNCI_RECT = (0.0, 0.1, 0.4, 0.55)
 hwnd = get_window_handle('驱入虚空')
 reader = easyocr.Reader(['ch_sim', 'en'], gpu=True)
 current_wave = 0
+last_q_time = time.time()
 while True:
     rect = get_window_rect(hwnd)
     img = capture_frame(rect)
@@ -21,7 +23,16 @@ while True:
         key_press(hwnd, 'space')
         log('跳一下')
 
-    key_press(hwnd, 'Q')
+    current_time = time.time()
+    if current_time - last_q_time > Q_INTERVAL:
+        # 切回主角释放Q技能后返回
+        key_press(hwnd, '1')
+        time.sleep(1)
+        key_press(hwnd, 'Q')
+        time.sleep(3)
+        key_press(hwnd, '2')
+        last_q_time = current_time
+        log('Q技能')
 
     # 识别波数
     text = ocr_image(img, reader, LUNCI_RECT)
@@ -44,6 +55,8 @@ while True:
         else:
             key_press(hwnd, 'esc')
             log(f'结束{WAVE_COUNT}波，重新开始')
+            time.sleep(1)
+            key_press(hwnd, 'esc')
             time.sleep(1)
             key_press(hwnd, 'r')
             time.sleep(10)

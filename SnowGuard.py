@@ -57,7 +57,7 @@ while True:
     img = capture_frame(rect)
     # 无尽抵抗
     text = ocr_image(img, reader, WUJINDIKANG_RECT)
-    bbox = find_text_with_confidence(text, '无尽抵抗', 0.0) # 因为文本和背景花纹融合被检测为符号，故不做置信度限制
+    bbox, _ = find_text_with_confidence(text, '无尽抵抗', 0.0) # 因为文本和背景花纹融合被检测为符号，故不做置信度限制
     if bbox:
         x, y = get_real_click_position(rect, WUJINDIKANG_RECT, img.size, bbox)
         click(hwnd, x, y)
@@ -65,7 +65,7 @@ while True:
         continue
     # 准备作战
     text = ocr_image(img, reader, ZHUNBEIZUOZHAN_RECT)
-    bbox = find_text_with_confidence(text, '准备作战')
+    bbox, _ = find_text_with_confidence(text, '准备作战')
     if bbox:
         x, y = get_real_click_position(rect, ZHUNBEIZUOZHAN_RECT, img.size, bbox)
         click(hwnd, x, y)
@@ -73,7 +73,7 @@ while True:
         continue
     # 惊喜奖励
     text = ocr_image(img, reader, JINGXIJIANGLI_RECT)
-    bbox = find_text_with_confidence(text, '惊喜奖励')
+    bbox, _ = find_text_with_confidence(text, '惊喜奖励')
     if bbox:
         x, y = get_real_click_position(rect, JINGXIJIANGLI_RECT, img.size, bbox)
         click(hwnd, x, y)
@@ -81,7 +81,7 @@ while True:
         continue
     # 退出
     text = ocr_image(img, reader, TUICHU_RECT)
-    bbox = find_text_with_confidence(text, '退出')
+    bbox, _ = find_text_with_confidence(text, '退出')
     if bbox:
         x, y = get_real_click_position(rect, TUICHU_RECT, img.size, bbox)
         click(hwnd, x, y)
@@ -89,13 +89,13 @@ while True:
         continue
     # 请选择
     text = ocr_image(img, reader, QINGXUANZE_RECT)
-    bbox = find_text_with_confidence(text, '请选择')
+    bbox, _ = find_text_with_confidence(text, '请选择')
     if bbox:
         # 这里是选择伙伴界面
         text = ocr_image(img, reader, HUOBAN_RECT)
         print(text)
         for p in PRIORITY:
-            bbox = find_text_with_confidence(text, p, 0.5)
+            bbox, _ = find_text_with_confidence(text, p, 0.5)
             if bbox:
                 x, y = get_real_click_position(rect, HUOBAN_RECT, img.size, bbox)
                 click(hwnd, x, y)
@@ -110,7 +110,7 @@ while True:
         win32api.SetCursorPos((x, y))
         # 确定
         text = ocr_image(img, reader, QUEDING_RECT)
-        bbox = find_text_with_confidence(text, '确定')
+        bbox, _ = find_text_with_confidence(text, '确定')
         if bbox:
             x, y = get_real_click_position(rect, QUEDING_RECT, img.size, bbox)
             click(hwnd, x, y)

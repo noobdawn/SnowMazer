@@ -55,10 +55,10 @@ while True:
         continue
     # 选择增益
     text = ocr_image(img, reader, XUANZEZENGYI_RECT)
-    bbox = find_text_with_confidence(text, '选择增益')
+    bbox, _ = find_text_with_confidence(text, '选择增益')
     if bbox:
         text = ocr_image(img, reader, ZENGYI_LEFT_RECT)
-        bbox = find_text_with_confidence(text, '单体')
+        bbox, _ = find_text_with_confidence(text, '单体')
         if not bbox:
             x, y = get_real_click_position_nobbox(rect, ZENGYI_LEFT_RECT, img.size)
             click(hwnd, x, y)
@@ -68,14 +68,14 @@ while True:
         # 点击确定
         tempimg = capture_frame(rect)
         text = ocr_image(tempimg, reader, QUEREN_RECT)
-        bbox = find_text_with_confidence(text, '确认')
+        bbox, _ = find_text_with_confidence(text, '确认')
         if bbox:
             x, y = get_real_click_position(rect, QUEREN_RECT, img.size, bbox)
             click(hwnd, x, y)
             log("检测到 确认")
     # 点击丢弃
     text = ocr_image(img, reader, DIUQI_RECT)
-    bbox = find_text_with_confidence(text, '丢弃')
+    bbox, _ = find_text_with_confidence(text, '丢弃')
     if bbox:
         x, y = get_real_click_position(rect, DIUQI_RECT, img.size, bbox)
         click(hwnd, x, y)
@@ -83,7 +83,7 @@ while True:
         continue
     # 点击丢弃确认
     text = ocr_image(img, reader, DIUQIQUEREN_RECT)
-    bbox = find_text_with_confidence(text, '确定')
+    bbox, _ = find_text_with_confidence(text, '确定')
     if bbox:
         x, y = get_real_click_position(rect, DIUQIQUEREN_RECT, img.size, bbox)
         click(hwnd, x, y)
@@ -91,7 +91,7 @@ while True:
         continue
     # 增益试炼入口
     text = ocr_image(img, reader, ZENGYISHILIAN_RECT)
-    bbox = find_text_with_confidence(text, '增益试炼')
+    bbox, _ = find_text_with_confidence(text, '增益试炼')
     if bbox:
         x, y = get_real_click_position(rect, ZENGYISHILIAN_RECT, img.size, bbox)
         click(hwnd, x, y)
@@ -99,7 +99,7 @@ while True:
         continue
     # 增益试炼：厄险
     text = ocr_image(img, reader, ZENGYISHILIAN_EXIAN_RECT)
-    bbox = find_text_with_confidence(text, '厄险', 0.5)                                 # 在4k主屏2k副屏的设备下，若游戏窗口为720p且在副屏，识别率会降低，故将置信度门槛降低
+    bbox, _ = find_text_with_confidence(text, '厄险', 0.5)                                 # 在4k主屏2k副屏的设备下，若游戏窗口为720p且在副屏，识别率会降低，故将置信度门槛降低
     if bbox:
         x, y = get_real_click_position(rect, ZENGYISHILIAN_EXIAN_RECT, img.size, bbox)
         click(hwnd, x, y)
@@ -108,7 +108,7 @@ while True:
         continue
     # 开始作战
     text = ocr_image(img, reader, KAISHIZUOZHAN_RECT)
-    bbox = find_text_with_confidence(text, '开始作战')
+    bbox, _ = find_text_with_confidence(text, '开始作战')
     if bbox:
         x, y = get_real_click_position(rect, KAISHIZUOZHAN_RECT, img.size, bbox)
         click(hwnd, x, y)
@@ -117,7 +117,7 @@ while True:
         continue
     # 退出
     text = ocr_image(img, reader, TUICHU_RECT)
-    bbox = find_text_with_confidence(text, '退出')
+    bbox, _ = find_text_with_confidence(text, '退出')
     if bbox:
         x, y = get_real_click_position(rect, TUICHU_RECT, img.size, bbox)
         click(hwnd, x, y)
