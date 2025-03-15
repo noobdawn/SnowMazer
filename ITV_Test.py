@@ -191,7 +191,8 @@ def main():
     print("当前窗口模式:", style)
     
     # 设置窗口位置
-    set_window_to_left_top(hwnd)
+    if style == "窗口化":
+        set_window_to_left_top(hwnd)
 
     # 开始捕获屏幕
     capturer = ScreenCapturer(hwnd)
@@ -203,15 +204,15 @@ def main():
             continue
         
         # 地图位于左上角的256x256区域
-        map_rect = (0, 0, 256, 256)
-        map_scale_rect = (0.0, 0.0, 256 / 1600, 256 / 900)
+        map_scale_rect = (0.0, 0.0, 256.0 / 1600, 256.0 / 900)
         map_image = crop_image_with_scale(frame, map_scale_rect)
+        cv2.imwrite("map.png", map_image)
 
         map_image = map_process(map_image)
 
         cv2.imshow("map", map_image)
         # 将窗口放到目标窗口的右边
-        cv2.moveWindow("map", capturer.width, 0)
+       #  cv2.moveWindow("map", capturer.width, 0)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
