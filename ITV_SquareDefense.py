@@ -19,9 +19,9 @@ while True:
     img = capture_frame(rect)
 
     # 1%的概率跳一下
-    if random.random() < 0.1:
-        key_press(hwnd, 'space')
-        log('跳一下')
+    # if random.random() < 0.1:
+    #     key_press(hwnd, 'space')
+    #     log('跳一下')
 
     current_time = time.time()
     if current_time - last_q_time > Q_INTERVAL:

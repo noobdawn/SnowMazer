@@ -7,9 +7,109 @@ from PIL import Image
 import easyocr
 import pyautogui
 from pycaw.pycaw import AudioUtilities, ISimpleAudioVolume
+import Data.AutoData as ad
 
 mouse_down = False
 delta_time = 1.0 / 60
+
+# region 显示器和窗体信息的获取和操作
+def get_monitor_info(hwnd):
+    if ad.monitor_info is not None:
+        return ad.monitor_info    
+    monitor = win32api.MonitorFromWindow(hwnd, win32con.MONITOR_DEFAULTTONEAREST)
+    ad.monitor_info = win32api.GetMonitorInfo(monitor)
+    return ad.monitor_info
+
+
+def get_monitor_index(hwnd):
+    """
+    根据窗口句柄获取其所在的显示器索引（0-based）
+    """    
+    # 枚举所有显示器，获取它们的句柄列表
+    monitors = win32api.EnumDisplayMonitors()
+
+    # 排序，根据显示器的左上角坐标
+    monitors.sort(key=lambda x: x[2][0])
+
+    # 获取窗口左上角坐标
+    x, y = get_monitor_position(hwnd)
+
+    # 查找窗口所在的显示器
+    for i, monitor in enumerate(monitors):
+        monitor_rect = monitor[2]
+        if monitor_rect[0] <= x < monitor_rect[2] and monitor_rect[1] <= y < monitor_rect[3]:
+            return i    
+    
+    return 0  # 默认返回第一个显示器
+    
+
+# 获取显示器尺寸
+def get_monitor_size(hwnd):
+    monitor_info = get_monitor_info(hwnd)
+    monitor_rect = monitor_info['Monitor']
+    width = monitor_rect[2] - monitor_rect[0]
+    height = monitor_rect[3] - monitor_rect[1]
+    return width, height
+
+
+# 获取显示器左上角坐标
+def get_monitor_position(hwnd):
+    monitor_info = get_monitor_info(hwnd)
+    monitor_rect = monitor_info['Monitor']
+    x, y = monitor_rect[0], monitor_rect[1]
+    return x, y
+
+
+# 判断窗口样式
+def get_window_style(hwnd):
+    style = win32gui.GetWindowLong(hwnd, win32con.GWL_STYLE)
+    ex_style = win32gui.GetWindowLong(hwnd, win32con.GWL_EXSTYLE)
+    
+    # 判断是否有边框和标题栏
+    has_caption = (style & win32con.WS_CAPTION) == win32con.WS_CAPTION
+    has_thickframe = (style & win32con.WS_THICKFRAME) == win32con.WS_THICKFRAME
+    
+    if has_caption or has_thickframe:
+        return "窗口化"
+    else:
+        return "无边框"
+
+
+# 设置窗口位置
+def set_window_to_left_top(hwnd):
+    x, y = get_monitor_position(hwnd)
+    window_rect = win32gui.GetWindowRect(hwnd)
+    window_width, window_height = window_rect[2] - window_rect[0], window_rect[3] - window_rect[1]
+
+    # 设置窗口位置
+    win32gui.SetWindowPos(
+        hwnd,
+        win32con.HWND_TOP,
+        x,
+        y,
+        window_width,
+        window_height,
+        win32con.SWP_SHOWWINDOW
+    )
+    print("窗口已移动到左上角")
+    
+    return True
+# endregion
+
+
+# 截取图像
+def crop_image_with_pixel(image, rect):
+    left, top, right, bottom = rect
+    return image[top:bottom, left:right]
+
+
+def crop_image_with_scale(image, rect):
+    width, height = image.shape[1], image.shape[0]
+    left, top, right, bottom = rect
+    left, top, right, bottom = int(left * width), int(top * height), int(right * width), int(bottom * height)
+    return image[top:bottom, left:right]
+
+
 
 
 # 常见按键别名映射
