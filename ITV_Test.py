@@ -15,7 +15,7 @@ from Utils.IntoTheVoidUtils import *
 from Utils.ScreenCapturer import ScreenCapturer
 import easyocr
 
-WAVE_COUNT = 4
+WAVE_COUNT = 12
 
 
 def detect_arrow_orientation(minimap_image):
@@ -198,7 +198,7 @@ def gotoFirstDefendPoint():
             "前往第一个防守地点——向右前方移动"))
     
 
-def gotoSecondDefendPoint():
+def gotoSecondDefendPoint(wave):
     # 直到上侧的距离不足90，向左前方移动
     ACTION_QUEUE.append(
         ITVAction(
@@ -228,7 +228,7 @@ def gotoSecondDefendPoint():
             "前往第二个防守地点——向左前方移动"))
 
 
-def returnToFirstDefendPoint():
+def returnToFirstDefendPoint(wave):
     # 直到下方的距离不足20，向右后方移动
     ACTION_QUEUE.append(
         ITVAction(
@@ -251,7 +251,8 @@ def returnToFirstDefendPoint():
             AE.ACTION_KEY_UP, MAKE_KEY_DICT('d', 's'),
             "返回第一个防守地点——向右后方移动"))     
 
-def castQSkill():    
+
+def castQSkill(wave):
     # 释放Q技能，并等待3秒
     ACTION_QUEUE.append(
         Action(
@@ -266,6 +267,23 @@ def castQSkill():
             AC.CONDITIONS_NONE, None,
             AE.ACTION_WAIT, MAKE_WAIT_DICT(3),
             "第二次释放金甲虫"))
+    if wave >= 4:
+        # 释放Q技能，并等待3秒
+        ACTION_QUEUE.append(
+            Action(
+                AE.ACTION_KEY_PRESS, MAKE_KEY_DICT('q'),
+                AC.CONDITIONS_NONE, None,
+                AE.ACTION_WAIT, MAKE_WAIT_DICT(3),
+                "第三次释放金甲虫"))
+    if wave >= 8:
+        # 释放Q技能，并等待3秒
+        ACTION_QUEUE.append(
+            Action(
+                AE.ACTION_KEY_PRESS, MAKE_KEY_DICT('q'),
+                AC.CONDITIONS_NONE, None,
+                AE.ACTION_WAIT, MAKE_WAIT_DICT(3),
+                "第四次释放金甲虫"))
+
 
 # 添加动作
 def fillActionQueue():
@@ -279,8 +297,8 @@ def fillActionQueue():
                 IAC.CONDITIONS_OCR_TEXT, MAKE_OCR_DICT((0.0, 0.45, 0.2, 0.55), "前往目标地点", 0.3),
                 AE.ACTION_NONE, None,
                 "等待前往第二个防守地点"))
-        gotoSecondDefendPoint()
-        castQSkill()
+        gotoSecondDefendPoint(wave)
+        castQSkill(wave)
         
         if wave < WAVE_COUNT - 1:
             # 等待，直到识别出上方区域有"任务完成"的文本，然后按C键
@@ -298,8 +316,8 @@ def fillActionQueue():
                     AE.ACTION_NONE, None,
                     "等待前往第一个防守地点"))
             # 原路返回
-            returnToFirstDefendPoint()
-            castQSkill()
+            returnToFirstDefendPoint(wave)
+            castQSkill(wave)
         else:
             # 等待，直到识别出上方区域有"任务完成"的文本，然后按ESC键
             ACTION_QUEUE.append(
@@ -330,35 +348,8 @@ def fillActionQueue():
                     AE.ACTION_NONE, None,
                     "等待下一轮防守"))
             whenEnterScene()
-
-    
-
-
 # endregion
 
-# 直到右侧有足够距离前为止，向左前方移动
-# ACTION_QUEUE.append(Action(CONDITIONS_RIGHT_DISTANCE_BIGGER_THAN, 50, ACTION_KEY_DOWN, ['a', 'w'], ACTION_KEY_UP, ['a', 'w']))
-# # 直到右侧的距离不足20，向右前方移动
-# ACTION_QUEUE.append(Action(CONDITIONS_RIGHT_DISTANCE_BELOW, 20, ACTION_KEY_DOWN, ['d', 'w'], ACTION_KEY_UP, ['d', 'w']))
-# # 等待，直到识别出左侧区域有"前往目标地点"的文本
-# ACTION_QUEUE.append(Action(CONDITIONS_OCR_TEXT, 0, ACTION_NONE, None, ACTION_NONE, None))
-# # 直到右侧有足够距离前为止，向左前方移动
-# ACTION_QUEUE.append(Action(CONDITIONS_RIGHT_DISTANCE_BIGGER_THAN, 50, ACTION_KEY_DOWN, ['a', 'w'], ACTION_KEY_UP, ['a', 'w']))
-# # 直到右侧的距离不足30，向右前方移动
-# ACTION_QUEUE.append(Action(CONDITIONS_RIGHT_DISTANCE_BELOW, 30, ACTION_KEY_DOWN, ['d', 'w'], ACTION_KEY_UP, ['d', 'w']))
-# # 直到上方的距离不足70，向左前方移动
-# ACTION_QUEUE.append(Action(CONDITIONS_UP_DISTANCE_BELOW, 70, ACTION_KEY_DOWN, ['a', 'w'], ACTION_KEY_UP, ['a', 'w']))
-# # 等待，直到识别出上方区域有"任务完成"的文本，然后按C键
-# ACTION_QUEUE.append(Action(CONDITIONS_OCR_TEXT, 0, ACTION_NONE, None, ACTION_KEY_PRESS, ['c']))
-# # 等待，直到识别出左侧区域有"前往目标地点"的文本
-# ACTION_QUEUE.append(Action(CONDITIONS_OCR_TEXT, 0, ACTION_NONE, None, ACTION_NONE, None))
-# # 原路返回
-# # 直到下方的距离不足40，向右后方移动
-# ACTION_QUEUE.append(Action(CONDITIONS_DOWN_DISTANCE_BELOW, 40, ACTION_KEY_DOWN, ['d', 's'], ACTION_KEY_UP, ['d', 's']))
-# # 直到左侧的距离不足30，向左后方移动
-# ACTION_QUEUE.append(Action(CONDITIONS_LEFT_DISTANCE_BELOW, 30, ACTION_KEY_DOWN, ['a', 's'], ACTION_KEY_UP, ['a', 's']))
-# # 直到下方的距离不足20，向右后方移动
-# ACTION_QUEUE.append(Action(CONDITIONS_DOWN_DISTANCE_BELOW, 20, ACTION_KEY_DOWN, ['d', 's'], ACTION_KEY_UP, ['d', 's']))
 
 
 # 主函数
@@ -369,8 +360,6 @@ def main():
         print("未找到指定窗口")
         return
     ad.reader = easyocr.Reader(['en', 'ch_sim'], gpu=True)
-    ad.cn_reader = easyocr.Reader(['ch_sim'], gpu=True)
-    ad.en_reader = easyocr.Reader(['en'], gpu=True)
     
     # 获取窗口样式
     style = get_window_style(ad.hwnd)    
@@ -393,7 +382,6 @@ def main():
 
         wall_mask = get_wall_mask(map_image)
         masked_image = cv2.bitwise_and(map_image, map_image, mask=wall_mask)
-        cv2.imshow("wall_mask", masked_image)
 
         angle = detect_arrow_orientation(map_image)
 
@@ -419,24 +407,11 @@ def main():
             CURRENT_ACTION = None
 
         # 绘制预览窗体
-        preview_texture = cv2.cvtColor(wall_mask, cv2.COLOR_GRAY2BGR)
-        # if angle is not None:
-        #     # 在地图上绘制一条射线
-        #     center = (128, 128)
-        #     length = 100
-        #     radian = np.radians(angle)
-        #     dx = int(length * np.cos(radian))
-        #     dy = int(length * np.sin(radian))
-        #     cv2.line(preview_texture, center, (center[0] + dx, center[1] + dy), (0, 255, 0), 2)
-        #     cv2.putText(preview_texture, f"Angle: {angle:.2f} degree", (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
-        # else:
-        #     cv2.putText(preview_texture, "No Arrow Found", (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 1)
-            
+        preview_texture = cv2.cvtColor(wall_mask, cv2.COLOR_GRAY2BGR)            
         cv2.putText(preview_texture, "r: " + str(right_distance), (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
         cv2.putText(preview_texture, "l: " + str(left_distance), (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
         cv2.putText(preview_texture, "u: " + str(up_distance), (10, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
         cv2.putText(preview_texture, "d: " + str(down_distance), (10, 100), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
-
         cv2.imshow("map", preview_texture)
 
 

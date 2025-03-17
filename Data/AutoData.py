@@ -5,7 +5,5 @@
 hwnd = None
 # OCR模型
 reader = None
-cn_reader = None
-en_reader = None
 # 显示器信息
 monitor_info = None

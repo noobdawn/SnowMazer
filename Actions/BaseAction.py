@@ -52,7 +52,7 @@ class BaseAction:
             search_text = self.endConditionParams['search_text']
             confidence = self.endConditionParams.get('confidence', 0.8)
             # start_time = time.time()
-            text = au.ocr_image(img, ad.cn_reader, search_rect)
+            text = au.ocr_image(img, ad.reader, search_rect)
             # print(f'ocr time: {time.time() - start_time}')
             bbox, _ = au.find_text_with_confidence(text, search_text, confidence)
             self.cacheParams['ocr_bbox'] = bbox
