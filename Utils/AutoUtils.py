@@ -8,6 +8,11 @@ import easyocr
 import pyautogui
 from pycaw.pycaw import AudioUtilities, ISimpleAudioVolume
 import Data.AutoData as ad
+from dataclasses import dataclass
+from typing import Optional, List
+import datetime
+import threading
+from abc import ABC, abstractmethod
 
 mouse_down = False
 delta_time = 1.0 / 60
@@ -186,8 +191,6 @@ def str_to_virtual_key(key_str):
     except AttributeError:
         raise ValueError(f"Unsupported key: {key_str}")
 
-def log(msg):
-    print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}.{int(time.time() * 1000) % 1000:03d}] {msg}")
 
 def get_window_handle(window_name):
     return win32gui.FindWindow(None, window_name)
@@ -374,3 +377,86 @@ def key_press(hwnd, key, use_pyautogui=False, press_duration=delta_time):
         # 如果使用SendMessage，可能需要短暂延时
         time.sleep(press_duration)
     key_up(hwnd, key, use_pyautogui)
+
+
+# region 日志
+# 抽象类LogWidget，是日志窗口的抽象接口
+class LogWidget:
+    @abstractmethod
+    def addLog(self, time: str, level: str, content: str, tag: str):
+        pass
+
+    @abstractmethod
+    def clearLog(self):
+        pass
+
+
+LEVEL_INFO = 0
+LEVEL_WARNING = 1
+LEVEL_ERROR = 2
+# 一条日志
+@dataclass
+class log:
+    """日志类"""
+    message : str
+    level :int
+    tag : Optional[str] = None
+    timestamp : datetime.datetime = datetime.datetime.now()
+
+# 日志工具
+# 只储存最近的若干条日志
+class logger:
+    def __init__(self, logCount : int):
+        self.logCount = logCount
+        self._logs : List[log] = []
+        self._lock = threading.Lock()
+
+
+    def add_log(self, level: int, message: str, tag: Optional[str] = None):
+        log = log(message, level, tag, datetime.datetime.now())
+        with self._lock:
+            self._logs.append(log)
+            if len(self._logs) > self.logCount:
+                self._logs.pop(0)
+
+
+    def getLevelFilter(self, level : int):
+        return [x for x in self._logs if x.level == level]
+    
+
+    def getTagFilter(self, tag : str):
+        return [x for x in self._logs if x.tag == tag]
+    
+
+    @property
+    def logs(self):
+        return self._logs
+
+
+def _log(level: int, message: str, *args, tag: Optional[str] = None, **kwargs):
+    if ad.logger is None:
+        ad.logger = logger(256)
+    try:
+        formatted = message.format(*args, **kwargs) if args or kwargs else message
+    except Exception as e:
+        formatted = f"Log format error: {str(e)}, raw message: {message}"
+    ad.logger.add_log(level, formatted, tag)
+
+
+# 公共日志接口
+def LOG(message: str, *args, tag: Optional[str] = None, **kwargs):
+    """记录普通信息"""
+    _log(LEVEL_INFO, message, *args, tag=tag, **kwargs)
+
+def WARNING(message: str, *args, tag: Optional[str] = None, **kwargs):
+    """记录警告信息"""
+    _log(LEVEL_WARNING, message, *args, tag=tag, **kwargs)
+
+def ERROR(message: str, *args, tag: Optional[str] = None, **kwargs):
+    """记录错误信息"""
+    _log(LEVEL_ERROR, message, *args, tag=tag, **kwargs)
+
+# 老的方法，只输出到命令行，保留，不推荐使用
+def log(msg):
+    print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}.{int(time.time() * 1000) % 1000:03d}] {msg}")
+# endregion

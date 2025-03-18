@@ -7,3 +7,5 @@ hwnd = None
 reader = None
 # 显示器信息
 monitor_info = None
+# 日志
+logger = None
