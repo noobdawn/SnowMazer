@@ -9,6 +9,7 @@ class MainWindow(FluentWindow):
     """ Main Interface """
 
     def __init__(self):
+        self.initData()
         super().__init__()
 
         # Create sub-interfaces, when actually using, replace Widget with your own sub-interface
@@ -21,7 +22,6 @@ class MainWindow(FluentWindow):
 
         self.initNavigation()
         self.initWindow()
-        self.initData()
 
     def initNavigation(self):
         self.addSubInterface(self.homeInterface, FIF.HOME, 'Home')

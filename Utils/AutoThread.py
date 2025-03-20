@@ -4,7 +4,7 @@ import Data.AutoData as ad
 
 class WorkerThread(threading.Thread):
     """
-    工作线程基类，子类需实现 _task 方法
+    工作线程基类，子类需实现 _run_job 方法
     """
     def __init__(self):
         super().__init__()
@@ -13,15 +13,19 @@ class WorkerThread(threading.Thread):
         self._pause_flag = threading.Lock()    # 防止重复暂停/恢复
         self._pause_event.set()                # 初始允许运行
 
-    def run(self):
+    def _run_job(self):
         """线程主循环，处理暂停/恢复逻辑"""
-        while not self._stop_event.is_set():
-            self._pause_event.wait()           # 如果暂停则阻塞
-            self._task()                       # 执行子类具体任务
+        # while not self._stop_event.is_set():
+        #     self._pause_event.wait()           # 如果暂停则阻塞
+        #     self._task()                       # 执行子类具体任务
+        raise NotImplementedError("子类需实现 _run_job 方法")    
 
-    def _task(self):
-        """子类必须实现的具体任务逻辑"""
-        raise NotImplementedError("Subclass must implement _task method")
+    def run(self):
+        try:
+            self._run_job()
+        except Exception as e:
+            ad.logger.error(f"线程异常：{e}")
+            raise e
 
     def pause(self):
         """挂起线程"""
@@ -89,12 +93,12 @@ class ThreadManager:
                 self._current_thread.join()
                 self._current_thread = None
 
-    def get_current_worker_class(self) -> Type[WorkerThread] | None:
+    def get_current_worker_class(self):
         """获取当前线程的类类型（用于类型判断）"""
         with self._thread_lock:
             return self._current_thread.__class__ if self._current_thread else None
 
-    def get_current_worker_class_name(self) -> str:
+    def get_current_worker_class_name(self):
         """获取当前线程的类名（用于显示）"""
         with self._thread_lock:
             return self._current_thread.__class__.__name__ if self._current_thread else "无活动线程"

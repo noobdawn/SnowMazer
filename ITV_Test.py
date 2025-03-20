@@ -15,7 +15,7 @@ from Utils.IntoTheVoidUtils import *
 from Utils.ScreenCapturer import ScreenCapturer
 import easyocr
 
-WAVE_COUNT = 12
+WAVE_COUNT = 8
 
 
 def detect_arrow_orientation(minimap_image):

@@ -6,11 +6,12 @@ from qfluentwidgets import (CardWidget, setTheme, Theme, IconWidget, BodyLabel, 
                             VerticalSeparator, MSFluentWindow, NavigationItemPosition, GroupHeaderCardWidget,
                             ComboBox, SearchLineEdit, SubtitleLabel, TableWidget)
 from qfluentwidgets import FluentIcon as FIF
-from PyQt5.QtWidgets import QApplication, QWidget, QHBoxLayout, QVBoxLayout, QGraphicsOpacityEffect, QFrame
+from PyQt5.QtWidgets import QApplication, QWidget, QHBoxLayout, QVBoxLayout, QGraphicsOpacityEffect, QFrame, QTableWidgetItem
 from PyQt5.QtGui import QIcon, QFont, QColor, QPainter
 from PyQt5.QtCore import Qt, QPoint, QSize, QUrl, QRect, QPropertyAnimation
 from qfluentwidgets.common.config import qconfig, Theme
 from qfluentwidgets.components.widgets.acrylic_label import AcrylicBrush
+import Data.AutoData as ad
 
 from Utils.AutoUtils import LogWidget
 
@@ -54,13 +55,27 @@ class LogTableWidget(QWidget, LogWidget):
         self.tableView.setColumnCount(4)
 
         self.tableView.verticalHeader().hide()
-        self.tableView.setHorizontalHeaderLabels(['时间', '等级', '内容', '标签'])
-        self.tableView.resizeColumnsToContents()
+        self.tableView.setHorizontalHeaderLabels(['时间', '等级', '标签', '内容'])
+        # 最后一列自动拉伸
+        self.tableView.horizontalHeader().setStretchLastSection(True)
+        # 设置列宽
+        self.tableView.setColumnWidth(0, 120)
+        self.tableView.setColumnWidth(1, 120)
+        self.tableView.setColumnWidth(2, 120)
 
         self.hBoxLayout.setSpacing(10)
         # 距离四周的距离
         self.hBoxLayout.setContentsMargins(0, 0, 0, 0)
         self.hBoxLayout.addWidget(self.tableView)
+
+        # 连接日志添加信号
+        if ad.logger:
+            ad.logger.log_added.connect(self.addLog)
+        self.tableView.setRowCount(0)
+        for log in ad.logger.logs:
+            self.addLog(log.time, log.level, log.content, log.tag)
+        self.tableView.resizeColumnsToContents()
+        self.tableView.scrollToBottom()           
         
 
     def addLog(self, time: str, level: str, content: str, tag: str):
@@ -68,8 +83,8 @@ class LogTableWidget(QWidget, LogWidget):
         self.tableView.setRowCount(row + 1)
         self.tableView.setItem(row, 0, QTableWidgetItem(time))
         self.tableView.setItem(row, 1, QTableWidgetItem(level))
-        self.tableView.setItem(row, 2, QTableWidgetItem(content))
-        self.tableView.setItem(row, 3, QTableWidgetItem(tag))
+        self.tableView.setItem(row, 2, QTableWidgetItem(tag))
+        self.tableView.setItem(row, 3, QTableWidgetItem(content))
 
     def clearLog(self):
         self.tableView.setRowCount(0)

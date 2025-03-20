@@ -61,7 +61,7 @@ class WallMaskModel:
         self.b1 -= self.lr * db1
         
     def compute_loss(self, y_pred, y_true):
-        return -np.mean(y_true * np.log(y_pred + 1e-8) + (1 - y_true) * np.log(1 - y_pred + 1e-8))
+        return -np.mean(y_true * np.LOG(y_pred + 1e-8) + (1 - y_true) * np.LOG(1 - y_pred + 1e-8))
     
     def train(self, X, y, epochs=5000, batch_size=32):
         for epoch in range(epochs):
@@ -154,14 +154,16 @@ class SquareDefenseWorker(WorkerThread):
         self.needSwitch = needSwitch
 
 
-    def _task(self):
+    def _run_job(self):
         RENWUWANCHENG_RECT = (0.2, 0, 0.4, 0.2)
         LUNCI_RECT = (0.0, 0.1, 0.4, 0.55)
         hwnd = get_window_handle('驱入虚空')
+        LOG("已搜索到窗体句柄：{hwnd}", hwnd=hwnd, tag="烽燧广场")
         reader = ad.reader
         current_wave = 0
         lastQTime = time.time()
-        while True:
+        while not self._stop_event.is_set():
+            self._pause_event.wait()           # 如果暂停则阻塞
             rect = get_window_rect(hwnd)
             img = capture_frame(rect)
             currentTime = time.time()
@@ -183,7 +185,7 @@ class SquareDefenseWorker(WorkerThread):
                 wave = int(wave)
                 if wave != current_wave:
                     current_wave = wave
-                    log(f'第{current_wave}波开始')
+                    LOG(f'第{current_wave}波开始')
 
 
             # WAVE_COUNT波之后任务完成
@@ -192,12 +194,12 @@ class SquareDefenseWorker(WorkerThread):
             if bbox:
                 if current_wave < self.wave:
                     key_press(hwnd, 'c')
-                    log(f'{current_wave}波结束')
+                    LOG(f'{current_wave}波结束')
                     current_wave += 1
                     key_press(hwnd, 'Q')
                 else:
                     key_press(hwnd, 'esc')
-                    log(f'结束{self.wave}波，重新开始')
+                    LOG(f'结束{self.wave}波，重新开始')
                     time.sleep(1)
                     key_press(hwnd, 'esc')
                     time.sleep(1)
@@ -211,4 +213,8 @@ def isSquareWorking():
 
 def startSquareDefense(wave, qInterval, needSwitch):
     ad.threadManager.start_new(SquareDefenseWorker, wave, qInterval, needSwitch)
+
+
+def stopSquareDefense():
+    ad.threadManager.stop()
 # endregion

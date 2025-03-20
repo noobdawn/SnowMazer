@@ -5,7 +5,7 @@ from qfluentwidgets import (CardWidget, setTheme, Theme, IconWidget, BodyLabel, 
                             HeaderCardWidget, InfoBarIcon, HyperlinkLabel, HorizontalFlipView,
                             PrimaryPushButton, TitleLabel, PillPushButton, setFont, ScrollArea,
                             VerticalSeparator, MSFluentWindow, NavigationItemPosition, GroupHeaderCardWidget,
-                            ComboBox, SearchLineEdit, ProgressRing, IndeterminateProgressBar, CheckBox, SwitchButton)
+                            ComboBox, SearchLineEdit, ProgressRing, IndeterminateProgressBar, CheckBox, SwitchButton, InfoBar)
 from UI.CommonWidget import InterfaceWithLog, PictureBox
 from PyQt5.QtWidgets import QHBoxLayout, QVBoxLayout, QGridLayout, QStackedWidget, QStackedLayout, QFrame, QSpacerItem, QSizePolicy
 from Utils.IntoTheVoidUtils import *
@@ -19,11 +19,15 @@ class SquareAutoCombatCard(SimpleCardWidget):
         self.pictureBox = pictureBox
         self._ImageList = [
             "Image\\IntoTheVoid\\烽燧广场虫妹配置.jpg",
+            "Image\\IntoTheVoid\\烽燧广场挂机位置.jpg",
         ]
 
         self.nameLabel = TitleLabel("自动战斗：烽燧广场")
         self.combatButton = PrimaryPushButton("开始战斗")
-        self.descriptionLabel = BodyLabel("烽燧广场挂机配置：虫妹、机枪哥。")
+        self.descriptionLabel = BodyLabel("烽燧广场挂机配置：虫妹，堆减耗和持续时间。\n"
+                                          + "挂机方法：进入副本后，直接点击开始战斗即可。\n"
+                                          + "注意事项：不要一次性打过多轮次，以免召唤物无法应付足够强度的敌人。\n"
+                                          + "推荐二号位携带首领光环，如果是机枪哥更好。")
         self.progressBar = IndeterminateProgressBar()
         self.progressBar.stop()
 
@@ -111,16 +115,33 @@ class SquareAutoCombatCard(SimpleCardWidget):
 # endregion
 
     def onCombatButtonClicked(self):
-        if IsThreadWorking():
-            return
         if isSquareWorking():
+            stopSquareDefense()
+            self.progressBar.stop()
+            self.progressBar.hide()
+            self.combatButton.setText("开始战斗")
             return
+        if IsThreadWorking():
+            InfoBar.errorr(
+                title="失败",
+                content="其他自动战斗正在进行中",
+                orient=QtCore.Qt.Horizontal,
+                isClosable=True,
+                position = InfoBar.Position.TOP,
+                duration = 3000,
+                parent=self
+            )
         wave = int(self.waveSelect.currentText())
-        qInterval = float(self.qIntervalEdit.text())
+        # 如果输入不合法，直接设置为10
+        try:
+            qInterval = float(self.qIntervalEdit.text())
+        except:
+            qInterval = 10
+            self.qIntervalEdit.setText("10")
         needSwitch = self.useSecondCharacter.isChecked()
         startSquareDefense(wave, qInterval, needSwitch)
         self.progressBar.start()
-        
+        self.combatButton.setText("停止战斗")
 
 
 

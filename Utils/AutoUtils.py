@@ -14,6 +14,7 @@ import datetime
 import threading
 from abc import ABC, abstractmethod
 from Utils.AutoThread import ThreadManager, WorkerThread
+from PyQt5.QtCore import QObject, pyqtSignal
 
 mouse_down = False
 delta_time = 1.0 / 60
@@ -395,6 +396,7 @@ class LogWidget:
 LEVEL_INFO = 0
 LEVEL_WARNING = 1
 LEVEL_ERROR = 2
+LEVEL_TEXT = ['INFO', 'WARNING', 'ERROR']
 # 一条日志
 @dataclass
 class log:
@@ -406,19 +408,24 @@ class log:
 
 # 日志工具
 # 只储存最近的若干条日志
-class logger:
+class logger(QObject):
+    log_added = pyqtSignal(str, str, str, str)
+
     def __init__(self, logCount : int):
+        super().__init__()
         self.logCount = logCount
         self._logs : List[log] = []
         self._lock = threading.Lock()
 
 
     def add_log(self, level: int, message: str, tag: Optional[str] = None):
-        log = log(message, level, tag, datetime.datetime.now())
+        l = log(message, level, tag, datetime.datetime.now())
         with self._lock:
-            self._logs.append(log)
+            self._logs.append(l)
             if len(self._logs) > self.logCount:
                 self._logs.pop(0)
+        lvlStr = LEVEL_TEXT[level]
+        self.log_added.emit(l.timestamp.strftime('%Y-%m-%d %H:%M:%S'), str(level), message, tag)
 
 
     def getLevelFilter(self, level : int):
@@ -458,8 +465,8 @@ def ERROR(message: str, *args, tag: Optional[str] = None, **kwargs):
     _log(LEVEL_ERROR, message, *args, tag=tag, **kwargs)
 
 # 老的方法，只输出到命令行，保留，不推荐使用
-def log(msg):
-    print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}.{int(time.time() * 1000) % 1000:03d}] {msg}")
+# def log(msg):
+#     print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}.{int(time.time() * 1000) % 1000:03d}] {msg}")
 # endregion
 
 def InitData():
