@@ -9,3 +9,9 @@ reader = None
 monitor_info = None
 # 日志
 logger = None
+# 线程管理器
+threadManager = None
+
+
+# 驱入虚空用的墙壁遮罩识别模型
+wallMaskModel = None

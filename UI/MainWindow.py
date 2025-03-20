@@ -5,8 +5,6 @@ from PyQt5.QtGui import QIcon
 from UI.CommonWidget import Widget, InterfaceWithLog
 from UI.Ui_IntoTheVoidInterface import Ui_IntoTheVoidInterface
 
-
-
 class MainWindow(FluentWindow):
     """ Main Interface """
 
@@ -23,6 +21,7 @@ class MainWindow(FluentWindow):
 
         self.initNavigation()
         self.initWindow()
+        self.initData()
 
     def initNavigation(self):
         self.addSubInterface(self.homeInterface, FIF.HOME, 'Home')
@@ -40,3 +39,7 @@ class MainWindow(FluentWindow):
         self.resize(900, 700)
         self.setWindowIcon(QIcon(':/qfluentwidgets/images/logo.png'))
         self.setWindowTitle('PyQt-Fluent-Widgets')
+
+    def initData(self):
+        from Utils.AutoUtils import InitData
+        InitData()

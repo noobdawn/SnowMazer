@@ -13,6 +13,7 @@ from typing import Optional, List
 import datetime
 import threading
 from abc import ABC, abstractmethod
+from Utils.AutoThread import ThreadManager, WorkerThread
 
 mouse_down = False
 delta_time = 1.0 / 60
@@ -460,3 +461,12 @@ def ERROR(message: str, *args, tag: Optional[str] = None, **kwargs):
 def log(msg):
     print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}.{int(time.time() * 1000) % 1000:03d}] {msg}")
 # endregion
+
+def InitData():
+    ad.logger = logger(256)
+    ad.threadManager = ThreadManager()
+    ad.reader = easyocr.Reader(['ch_sim', 'en'])
+
+
+def IsThreadWorking():
+    return ad.threadManager.get_current_worker_class() is not None

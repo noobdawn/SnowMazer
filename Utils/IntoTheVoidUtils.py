@@ -2,6 +2,10 @@ from Utils.AutoUtils import *
 import re
 import numpy as np
 import cv2
+from Utils.AutoThread import WorkerThread
+import Data.AutoData as ad
+from Utils.AutoUtils import *
+from Utils.IntoTheVoidUtils import *
 
 class WallMaskModel:
     def __init__(self, input_dim=3, hidden1=16, hidden2=8, lr=0.01):
@@ -138,3 +142,73 @@ def get_wave_count(results):
                             return cand_text.strip()
     
     return None  # 未找到数字
+
+
+# region 烽燧广场自动挂机
+class SquareDefenseWorker(WorkerThread):
+    """烽燧广场自动挂机"""
+    def __init__(self, wave, qInterval, needSwitch):
+        super().__init__()
+        self.wave = wave
+        self.qInterval = qInterval
+        self.needSwitch = needSwitch
+
+
+    def _task(self):
+        RENWUWANCHENG_RECT = (0.2, 0, 0.4, 0.2)
+        LUNCI_RECT = (0.0, 0.1, 0.4, 0.55)
+        hwnd = get_window_handle('驱入虚空')
+        reader = ad.reader
+        current_wave = 0
+        lastQTime = time.time()
+        while True:
+            rect = get_window_rect(hwnd)
+            img = capture_frame(rect)
+            currentTime = time.time()
+            if currentTime - lastQTime > self.qInterval:
+                # 切回主角释放Q技能后返回
+                if self.needSwitch:
+                    key_press(hwnd, '1')
+                    time.sleep(1)
+                key_press(hwnd, 'Q')
+                time.sleep(3)
+                if self.needSwitch:
+                    key_press(hwnd, '2')
+                lastQTime = currentTime
+
+            # 识别波数
+            text = ocr_image(img, reader, LUNCI_RECT)
+            wave = get_wave_count(text)
+            if wave is not None:
+                wave = int(wave)
+                if wave != current_wave:
+                    current_wave = wave
+                    log(f'第{current_wave}波开始')
+
+
+            # WAVE_COUNT波之后任务完成
+            text = ocr_image(img, reader, RENWUWANCHENG_RECT)
+            bbox, _ = find_text_with_confidence(text, '任务完成')
+            if bbox:
+                if current_wave < self.wave:
+                    key_press(hwnd, 'c')
+                    log(f'{current_wave}波结束')
+                    current_wave += 1
+                    key_press(hwnd, 'Q')
+                else:
+                    key_press(hwnd, 'esc')
+                    log(f'结束{self.wave}波，重新开始')
+                    time.sleep(1)
+                    key_press(hwnd, 'esc')
+                    time.sleep(1)
+                    key_press(hwnd, 'r')
+                    time.sleep(10)
+
+
+def isSquareWorking():
+    return ad.threadManager.get_current_worker_class() == SquareDefenseWorker
+
+
+def startSquareDefense(wave, qInterval, needSwitch):
+    ad.threadManager.start_new(SquareDefenseWorker, wave, qInterval, needSwitch)
+# endregion
